@@ -24,3 +24,14 @@ description Connected to SW1 port Eth 0/1
 
 Проверить работу функции на файле sh_cdp_n_sw1.txt.
 '''
+import re
+def generate_description_from_cdp(filename):
+    result_dict={}
+    with open(filename) as file:
+        for line in file:
+            if re.search(r'\w+\s+(Eth [\d/]+)',line) != None: #if it is line we need
+                result_dict[re.search(r'\w+\s+(Eth [\d/]+)',line).group(1)]=re.sub(r'(\w+)\s+Eth [\d/]+[\s\d]+[\w\s]{0,5}\s+\S+\s+(Eth [\d/]+)',r'description Connected to \1 port \2',line.rstrip())
+        return result_dict
+
+if __name__=="__main__":
+    print(generate_description_from_cdp('sh_cdp_n_sw1.txt'))

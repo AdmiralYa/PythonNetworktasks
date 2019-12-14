@@ -15,6 +15,7 @@
 Пример правил NAT cisco IOS
 ip nat inside source static tcp 10.1.2.84 22 interface GigabitEthernet0/1 20022
 ip nat inside source static tcp 10.1.9.5 22 interface GigabitEthernet0/1 20023
+ip nat inside source static tcp 10.66.0.13 995 interface GigabitEthernet0/1 995
 
 И соответствующие правила NAT для ASA:
 object network LOCAL_10.1.2.84
@@ -31,4 +32,14 @@ object network LOCAL_10.1.9.5
 
 Во всех правилах для ASA интерфейсы будут одинаковыми (inside,outside).
 '''
+import re
 
+def convert_ios_nat_to_asa(ios_file,asa_file):
+    with open(ios_file) as rfile:
+        ios_str=rfile.read()
+    with open(asa_file,'w') as wfile:
+        asa_str=re.sub(r'\S+\s\S+\s\w+\s\w+\s\w+\s(\w+)\s([\d.]+)\s(\d+)\s\w+\s[\w/]+\s(\d+)', r'object network LOCAL_\2\n host \2\n nat (inside,outside) static interface service \1 \3 \4',ios_str)
+        wfile.write(asa_str)
+
+if __name__=="__main__":
+    convert_ios_nat_to_asa('cisco_nat_config.txt','asa_nat_config.txt')

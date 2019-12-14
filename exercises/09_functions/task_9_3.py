@@ -22,3 +22,29 @@
 Ограничение: Все задания надо выполнять используя только пройденные темы.
 '''
 
+def get_int_vlan_map(config_filename):
+    '''
+    Функция обрабатывает файл, вытаскивает из него названия интерфейсов
+    далее если строка содержит 'access vlan', разбиваем строку по пробелам, берем последний элемент и конвертируем его
+    если строка содержит 'allowed vlan', повторяем те же процедуры, только в цикле меняем str значения на int
+    '''
+    intf_list=[]
+    access_vlan={}
+    trunk_vlan={}
+    with open(config_filename, 'r') as file:
+        for line in file:
+            if line.startswith('interface'):
+                intf=line.split()
+            if 'access vlan' in line:
+                vlan_numbers=line.split()
+                access_vlan[intf[1]]=int(vlan_numbers[-1])
+            elif 'allowed vlan' in line:
+                vlan_numbers=line.split()[-1].split(',')
+                vlan_numbers=[int(item) for item in vlan_numbers]
+                trunk_vlan[intf[1]]=vlan_numbers
+    result=(access_vlan,trunk_vlan)
+    return result
+
+ans=get_int_vlan_map('config_sw1.txt')
+for item in ans:
+    print(item)

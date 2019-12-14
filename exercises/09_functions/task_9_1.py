@@ -65,4 +65,16 @@ def generate_access_config(intf_vlan_mapping, access_template):
 
     Возвращает список всех портов в режиме access с конфигурацией на основе шаблона
     '''
+    access_list=[]
+    for intf,vlan_num in intf_vlan_mapping.items():
+        access_list.append('interface '+ intf)
+        for item in access_mode_template:
+            if item.endswith('access vlan'):
+                access_list.append(item + ' {}'.format(vlan_num))
+            else: access_list.append(item)
+    return access_list
 
+# result=generate_access_config(access_config, access_mode_template)
+# for item in result:
+#     print(item)
+# #print(result)

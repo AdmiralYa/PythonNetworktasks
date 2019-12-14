@@ -22,4 +22,22 @@ interface Loopback0
 
 Проверить работу функции на примере файла config_r1.txt.
 '''
+import re
+def get_ints_without_description(filename):
+    int_flag=False
+    result_list=[]
+    with open(filename) as file:
+        for line in file:
+            if line.startswith("interface"):
+                int_flag=True
+                int_name=re.search(r'\w+\s+([\w/.]+)',line).group(1)
+            if line.startswith(" description"):
+                int_flag=False
+            if line=='!\n':
+                if int_flag==True and int_name!="":
+                    result_list.append(int_name)
+                int_name=""
+    return result_list
 
+if __name__=="__main__":
+    print(get_ints_without_description("config_r1.txt"))

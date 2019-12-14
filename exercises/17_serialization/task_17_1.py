@@ -40,8 +40,37 @@
 '''
 
 import glob
-
+import re
+import csv
+import pytest
+import task_17_1
+import sys
+#from common_functions import check_function_exists, read_all_csv_content_as_list
 sh_version_files = glob.glob('sh_vers*')
-#print(sh_version_files)
 
 headers = ['hostname', 'ios', 'image', 'uptime']
+
+def parse_sh_version(sh_ver_str):
+    ios,image,uptime=re.search(r'\w+,[\s\w()-]+,\s\w+\s([\w.()]+)',sh_ver_str).group(1),re.search(r'System image file is "([^"]+)"',sh_ver_str).group(1),re.search(r'router uptime is (.+)',sh_ver_str).group(1)
+    return (ios,image,uptime)
+
+def write_inventory_to_csv(data_filenames, csv_filename):
+    result_list=[]
+    result_list.append(headers)
+    for file in data_filenames:
+        with open(file) as file_str:
+            hostname=re.search(r'\w+_(\w+)',file).group(1)
+            ios,image,uptime=parse_sh_version(file_str.read())
+            result_list.append([hostname,ios,image,uptime])
+    with open(csv_filename,'w',newline='',) as csvfile:
+        writer=csv.writer(csvfile)
+        writer.writerows(result_list)
+    with open(csv_filename) as f:
+        reader = csv.reader(f)
+        headert = next(reader)
+        print('Headers: ', headert)
+        for row in reader:
+            print(row)
+
+if __name__=="__main__":
+    write_inventory_to_csv(sh_version_files, "task_17_1.csv")

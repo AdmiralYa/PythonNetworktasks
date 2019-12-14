@@ -41,3 +41,25 @@ Cгенерировать топологию, которая соответст�
 
 '''
 
+from draw_network_graph import draw_topology
+from task_11_1 import parse_cdp_neighbors
+
+def create_network_map(filenames):
+    '''
+    Поочередно открываем каждый файл, обновляем словарь с помощью функции parse_cdp_neighbors
+    В цикле проверяем, равен ли ключ значению второго словаря, если нет-добавляем
+    '''
+    draw_dict={}
+    fin_dict={}
+    for name in filenames:
+        with open(name,'r') as file:
+            draw_dict.update(parse_cdp_neighbors(file.read()))
+    for key in draw_dict.keys():
+        if key not in fin_dict.values(): # Проверяем, нет ли зеркальных строк
+            fin_dict[key]=draw_dict[key] # Если нет, добавляем значение в словарь
+    draw_topology(fin_dict)
+    return fin_dict
+
+if __name__ == "__main__":
+    configs_list=['sh_cdp_n_sw1.txt','sh_cdp_n_r1.txt', 'sh_cdp_n_r2.txt','sh_cdp_n_r3.txt']
+    create_network_map(configs_list)

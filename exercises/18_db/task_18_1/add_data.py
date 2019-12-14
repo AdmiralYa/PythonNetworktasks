@@ -1,33 +1,4 @@
-# -*- coding: utf-8 -*-
 '''
-Задание 18.1
-
-Для заданий 18 раздела нет тестов!
-
-Необходимо создать два скрипта:
-
-1. create_db.py
-2. add_data.py
-
-
-1. create_db.py - в этот скрипт должна быть вынесена функциональность по созданию БД:
-  * должна выполняться проверка наличия файла БД
-  * если файла нет, согласно описанию схемы БД в файле dhcp_snooping_schema.sql, должна быть создана БД
-  * имя файла бд - dhcp_snooping.db
-
-В БД должно быть две таблицы (схема описана в файле dhcp_snooping_schema.sql):
- * switches - в ней находятся данные о коммутаторах
- * dhcp - тут хранится информация полученная из вывода sh ip dhcp snooping binding
-
-Пример выполнения скрипта, когда файла dhcp_snooping.db нет:
-$ python create_db.py
-Создаю базу данных...
-
-После создания файла:
-$ python create_db.py
-База данных существует
-
-
 2. add_data.py - с помощью этого скрипта, выполняется добавление данных в БД. Скрипт должен добавлять данные из вывода sh ip dhcp snooping binding и информацию о коммутаторах
 
 Соответственно, в файле add_data.py должны быть две части:
@@ -75,4 +46,66 @@ $ python add_data.py
 
 '''
 import sqlite3
+import re
+import glob
+import yaml
+from create_db import check_if_db_exists
 
+regex=re.compile(r'(\S+) +(\S+) +\d+ +\S+ +(\d+) +(\S+)') # take mac, ip , vlan, interface from sh dhcp snooping
+
+def parse_yml_file(yml_file):
+    '''
+    read file, iterate through items in dict.values()
+    append these vars to list
+    return list of tuples
+    '''
+    switch_list=[]
+    with open(yml_file) as ymlfile:
+        reader=yaml.safe_load(ymlfile)
+        for row in reader.values():
+            for key,value in row.items():
+                switch_list.append((key,value))
+    return switch_list
+
+def parse_dhcp_snoop_file(dhcp_snoop_file):
+    '''
+    open file, iterate through every line
+    match string with regex, adding this to correspond vars
+    add vars + switch (which is name of file) to the list of tuples
+    return list of tuples
+    '''
+    match_list=[]
+    with open(dhcp_snoop_file,newline='') as dhcp_file:
+         for line in dhcp_file:
+            match=regex.search(line)
+            if match:
+                mac,ip,vlan,interface=match.groups()
+                switch=re.search(r'([^_]+)',dhcp_snoop_file).group()
+                match_list.append((mac,ip,vlan,interface,switch))
+    return match_list
+
+def add_data_to_db(db_name,switch_info, dhcp_snooping_list):
+    if check_if_db_exists(db_name):
+        print('Добавляю данные в таблицу switches...')
+        connection=sqlite3.connect(db_name)             # connecting to database
+        for item in parse_yml_file(switch_info):        # going through all tuples in .yml file
+            try:
+                with connection:
+                    query_switch_table='insert into switches (hostname, location) values (?,?)'
+                    connection.execute(query_switch_table,item)     # execute query
+            except sqlite3.IntegrityError as err:
+                print('Возникла ошибка: ', err)
+        print('Добавляю данные в таблицу dhcp...')
+        for file_name in dhcp_snooping_list:            # iterating through files in list
+            query_dhcp_table='insert into dhcp (mac, ip, vlan, interface, switch) values (?,?,?,?,?)'
+            for item in parse_dhcp_snoop_file(file_name): # iterating through list of variables received from parse_dhcp_snoop_file
+                try:
+                    with connection:
+                        connection.execute(query_dhcp_table, item)
+                except sqlite3.IntegrityError as err:
+                    print('Возникла ошибка: ', err)
+    else: print('База данных не существует. Перед добавлением данных, ее надо создать')
+
+if __name__=="__main__":
+    dhcp_files_list=glob.glob('*_dhcp_snooping.txt')
+    add_data_to_db('dhcp_snooping.db','switches.yml',dhcp_files_list)
