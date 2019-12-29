@@ -1,15 +1,15 @@
-- device_type: cisco_ios
-  ip: 192.168.100.1
-  username: cisco
-  password: cisco
+- device_type: linux
+  ip: 10.198.20.192
+  username: root
+  password: '123'
   secret: cisco
-- device_type: cisco_ios
-  ip: 192.168.100.2
-  username: cisco
-  password: cisco
+- device_type: linux
+  ip: 10.198.20.194
+  username: root
+  password: '123'
   secret: cisco
-- device_type: cisco_ios
-  ip: 192.168.100.3
-  username: cisco
-  password: cisco
+- device_type: linux
+  ip: 10.198.20.195
+  username: root
+  password: '123'
   secret: cisco

@@ -41,3 +41,15 @@ topology_example = {('R1', 'Eth0/0'): ('SW1', 'Eth0/1'),
                     ('SW1', 'Eth0/3'): ('R3', 'Eth0/0')}
 
 
+class Topology:
+    def __init__(self,topology):
+        self.topology=topology
+        empty_topo={}
+        for key,value in topology.items():
+            if topology[key] not in empty_topo.keys():
+                empty_topo[key]=value
+        self.topology=empty_topo
+
+if __name__=="__main__":
+    top=Topology(topology_example)
+    print(top.topology)

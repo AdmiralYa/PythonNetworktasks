@@ -42,5 +42,18 @@ R1#
 '''
 
 commands = [
-    'logging 10.255.255.1', 'logging buffered 20010', 'no logging console'
+    'ip a', 'ip route', 'whoami'
 ]
+import netmiko
+import yaml
+
+def send_config_commands(device,config_commands):
+    with netmiko.ConnectHandler(**device) as ssh:
+        result=ssh.send_config_set(config_commands)
+    return result
+
+if __name__=="__main__":
+    with open('devices.yaml') as ymlfile:
+        devices=yaml.safe_load(ymlfile)
+    for device in devices:
+        print (send_config_commands(device,commands))

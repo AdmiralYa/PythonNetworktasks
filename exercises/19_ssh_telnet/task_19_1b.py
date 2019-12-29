@@ -11,3 +11,23 @@
 
 Для проверки измените IP-адрес на устройстве или в файле devices.yaml.
 '''
+import yaml
+import netmiko
+command = 'ip route'
+
+def send_show_command(device,command):
+    try:
+        with netmiko.ConnectHandler(**device) as ssh:
+            #ssh.enable()
+            result=ssh.send_command(command)
+            return result
+    except netmiko.NetMikoTimeoutException as err:
+        print(err)
+    except netmiko.NetMikoAuthenticationException as err:
+        print(err)
+
+if __name__=="__main__":
+    with open('devices.yaml') as dev_file:
+        dev_list=yaml.safe_load(dev_file)
+    for device in dev_list:
+        print(send_show_command(device,command))

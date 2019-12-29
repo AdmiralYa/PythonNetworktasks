@@ -98,3 +98,19 @@ commands_with_errors = ['logging 0255.255.1', 'logging', 'a']
 correct_commands = ['logging buffered 20010', 'ip http server']
 
 commands = commands_with_errors + correct_commands
+#TODO: complete task
+import netmiko
+import yaml
+
+def send_config_commands(device,config_commands, verbose=True):
+    with netmiko.ConnectHandler(**device) as ssh:
+        if verbose:
+            print("Connecting to ", device['ip'])
+        result=ssh.send_config_set(config_commands)
+    return result
+
+if __name__=="__main__":
+    with open('devices.yaml') as ymlfile:
+        devices=yaml.safe_load(ymlfile)
+    for device in devices:
+        print (send_config_commands(device,commands))

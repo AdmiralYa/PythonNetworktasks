@@ -24,3 +24,13 @@
 В качестве данных, используйте информацию из файла data_files/router_info.yml
 
 '''
+import yaml
+from task_21_1 import generate_config
+from sys import argv
+from pprint import pprint
+
+if __name__=="__main__":
+    with open("data_files/router_info.yml") as yamlfile:
+        data_dict=yaml.safe_load(yamlfile)
+    template_file=argv[1]
+    pprint(generate_config(template_file,data_dict))

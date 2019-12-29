@@ -14,7 +14,12 @@
 class Topology:
     def __init__(self, topology_dict):
         self.topology = self._normalize(topology_dict)
-
+    def _normalize(self,topology_dict):
+        empty_topo={}
+        for key,value in topology_dict.items():
+            if topology_dict[key] not in empty_topo.keys():
+                empty_topo[key]=value
+        return empty_topo
 
 topology_example = {('R1', 'Eth0/0'): ('SW1', 'Eth0/1'),
                     ('R2', 'Eth0/0'): ('SW1', 'Eth0/2'),
@@ -26,3 +31,6 @@ topology_example = {('R1', 'Eth0/0'): ('SW1', 'Eth0/1'),
                     ('SW1', 'Eth0/2'): ('R2', 'Eth0/0'),
                     ('SW1', 'Eth0/3'): ('R3', 'Eth0/0')}
 
+if __name__=="__main__":
+    top=Topology(topology_example)
+    print(top.topology)

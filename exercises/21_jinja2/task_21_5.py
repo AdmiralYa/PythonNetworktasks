@@ -24,12 +24,24 @@ cisco_vpn_1.txt и cisco_vpn_2.txt.
 Примеры конфигураций VPN, которые должна возвращать функция create_vpn_config в файлах
 cisco_vpn_1.txt и cisco_vpn_2.txt.
 '''
-
+from sys import argv
+import jinja2
+from pprint import pprint
 data = {
-    'tun_num': 10,
-    'wan_ip_1': '192.168.100.1',
-    'wan_ip_2': '192.168.100.2',
-    'tun_ip_1': '10.0.1.1 255.255.255.252',
-    'tun_ip_2': '10.0.1.2 255.255.255.252'
+        'tun_num': 17,
+        'wan_ip_1': '80.241.1.1',
+        'wan_ip_2': '90.18.10.2',
+        'tun_ip_1': '10.255.1.1 255.255.255.252',
+        'tun_ip_2': '10.255.1.2 255.255.255.252'
 }
 
+def create_vpn_config(template1, template2, data_dict):
+    env=jinja2.Environment(loader=jinja2.FileSystemLoader(template1.split('/')[0]))
+    template_file1=env.get_template(template1.split('/')[1])
+    template_file2=env.get_template(template2.split('/')[1])
+    return (template_file1.render(data_dict),template_file2.render(data_dict))
+
+if __name__=="__main__":
+  template_file1=argv[1]
+  template_file2=argv[2]
+  pprint(create_vpn_config(template_file1,template_file2,data))

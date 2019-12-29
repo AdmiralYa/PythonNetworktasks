@@ -32,6 +32,25 @@ Out[15]: 'config term\nEnter configuration commands, one per line.  End with CNT
 '''
 
 commands = [
-    'logging 10.255.255.1', 'logging buffered 20010', 'no logging console'
+    'ip a', 'ip route', 'whoami'
 ]
-command = 'sh ip int br'
+command = 'ip route'
+
+import yaml
+import netmiko
+
+def send_commands (device,show='',config=''):
+    if show:
+        with netmiko.ConnectHandler(**device) as ssh:
+            result=ssh.send_command(show)
+        return result
+    else:
+        with netmiko.ConnectHandler(**device) as ssh:
+            result=ssh.send_config_set(config)
+        return result
+
+if __name__=="__main__":
+    with open('devices.yaml') as ymlfile:
+        devices=yaml.safe_load(ymlfile)
+    for device in devices:
+        print(send_commands(device,config=commands))
